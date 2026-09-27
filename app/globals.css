@@ -1,0 +1,108 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-court-ink: #0a0e14;
+  --color-court-navy: #0f1729;
+  --color-court-line: #1f2a3d;
+  --color-ember: #ff5a1f;
+  --color-ember-soft: #ff7a45;
+  --color-ember-glow: #ffb37a;
+  --font-display: 'Space Grotesk', ui-sans-serif, sans-serif;
+  --font-body: Inter, ui-sans-serif, sans-serif;
+  --animate-spin-slow: spin-slow 6s linear infinite;
+  --animate-pulse-glow: pulse-glow 4s ease-in-out infinite;
+  --animate-marquee: marquee 22s linear infinite;
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.08);
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes rise {
+  0% {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+:root {
+  color-scheme: dark;
+}
+
+* {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: #0a0e14;
+  overflow-x: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.text-gradient {
+  background: linear-gradient(90deg, #ffb37a 0%, #ff5a1f 45%, #ff7a45 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.court-lines-bg {
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(255, 90, 31, 0.12), transparent 55%),
+    linear-gradient(180deg, #0a0e14 0%, #0c111c 100%);
+}
+
+.grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+:focus-visible {
+  outline: 2px solid #ff7a45;
+  outline-offset: 3px;
+  border-radius: 4px;
+}
