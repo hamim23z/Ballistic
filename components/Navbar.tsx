@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 const NAV_LINKS = [
   { href: '#features', label: 'Features' },
   { href: '#model', label: 'The Model' },
+  { href: '/about', label: 'About'},
+  { href: '/play', label: 'Play Now'}
 ];
 
 export default function Navbar() {
