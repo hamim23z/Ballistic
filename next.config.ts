@@ -2,18 +2,27 @@ import type { NextConfig } from 'next';
 
 const isDev = process.env.NODE_ENV === 'development';
 
+// The browser talks to Supabase Auth directly, so its origin must be allowed.
+const supabaseOrigin = (() => {
+  try {
+    return new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').origin;
+  } catch {
+    return '';
+  }
+})();
+
 const ContentSecurityPolicy = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self'",
   "img-src 'self' data: blob:",
-  "connect-src 'self'",
+  `connect-src 'self'${supabaseOrigin ? ` ${supabaseOrigin} ${supabaseOrigin.replace(/^http/, 'ws')}` : ''}`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
   "frame-ancestors 'none'",
-  "upgrade-insecure-requests",
+  'upgrade-insecure-requests',
 ].join('; ');
 
 const securityHeaders = [
@@ -23,8 +32,7 @@ const securityHeaders = [
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
   {
     key: 'Permissions-Policy',
-    value:
-      'camera=(), microphone=(), geolocation=(), interest-cohort=(), browsing-topics=()',
+    value: 'camera=(), microphone=(), geolocation=(), interest-cohort=(), browsing-topics=()',
   },
   {
     key: 'Strict-Transport-Security',
