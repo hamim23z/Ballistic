@@ -169,20 +169,26 @@ export default function PlayCard() {
   const prefersReducedMotion = useReducedMotion();
   const storedGuestName = useStoredGuestName();
 
+  //----------------------------------------------------------------------------------
   //sign up states
   const [username, setUsername] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
 
+  //error and loading states for sign up
+  const [error, setError] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
+  const [notice, setNotice] = useState<string>('')
+
   //sign in states
   const [signinemail, setSignInEmail] = useState<string>('')
   const [signinpassword, setSignInPassword] = useState<string>('')
 
-  //error and loading states
-  const [error, setError] = useState<string>('')
-  const [loading, setLoading] = useState<boolean>(false)
-  const [notice, setNotice] = useState<string>('')
-  
+  //error and loading states for sign in
+  const [errorsignin, setErrorSignIn] = useState<string>('')
+  const [loadingsignin, setLoadingSignIn] = useState<boolean>(false)
+  const [noticesignin, setNoticeSignIn] = useState<string>('')
+  //----------------------------------------------------------------------------------
 
 
   useEffect(() => {
@@ -231,10 +237,32 @@ export default function PlayCard() {
     launchTipOff(guestName);
   }
 
-  function handleSignInSubmit(event: FormEvent<HTMLFormElement>) {
+  //----------------------------------------------------------------------------------
+  //sign in function
+  async function handleSignInSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-  }
+    setErrorSignIn('')
+    setNoticeSignIn('')
+    setLoadingSignIn(true)
+    const supabase = createClient()
 
+    const {data, error: signinError } = await supabase.auth.signInWithPassword({
+      email: signinemail,
+      password: signinpassword
+    })
+
+    if (signinError) {
+      setErrorSignIn(signinError.message)
+    }
+    else if (!data.session) {
+      setNoticeSignIn('Successfully signed in.')
+    }
+    setLoadingSignIn(false)
+  }
+  //----------------------------------------------------------------------------------
+
+
+//----------------------------------------------------------------------------------
   //sign up function
   async function handleSignUpSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -260,6 +288,8 @@ export default function PlayCard() {
     }
     setLoading(false)
   }
+//----------------------------------------------------------------------------------
+
 
   return (
     <>
@@ -384,6 +414,8 @@ export default function PlayCard() {
                   className={inputClass}
                 />
                 <PrimaryButton type="submit">Sign In</PrimaryButton>
+                {errorsignin && <p>{errorsignin}</p>}
+                {noticesignin && <p>{noticesignin}</p>}
               </motion.form>
             ) : 
             
