@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useReducedMotion } from '@/lib/useReducedMotion';
 import PasswordShell from '@/components/password/PasswordShell';
-import { SWAT_MS } from '@/components/password/ShotClockScene';
+import HuddleScene, { HUDDLE_MS } from '@/components/password/HuddleScene';
 import { ErrorText, Field, SubmitButton, inputClass } from '@/components/password/ui';
 
 //----------------------------------------------------------------------------------
@@ -26,13 +26,16 @@ async function sendResetLink(email: string): Promise<{ error: string | null }> {
 }
 //----------------------------------------------------------------------------------
 
+// Typing this many characters draws the whole play on the whiteboard.
+const FULL_PLAY_CHARS = 18;
+
 export default function ForgotPasswordForm() {
   const reduced = useReducedMotion();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
-  const [swatKey, setSwatKey] = useState(0);
+  const [playKey, setPlayKey] = useState(0);
   const [violationKey, setViolationKey] = useState(0);
   const timer = useRef<number | null>(null);
 
@@ -57,19 +60,19 @@ export default function ForgotPasswordForm() {
       return;
     }
 
-    setSwatKey((k) => k + 1);
+    setPlayKey((k) => k + 1);
     timer.current = window.setTimeout(
       () => {
         setLoading(false);
         setSent(true);
       },
-      reduced ? 0 : SWAT_MS,
+      reduced ? 0 : HUDDLE_MS,
     );
   }
 
   function handleSendAgain() {
     setSent(false);
-    setSwatKey(0);
+    setPlayKey(0);
   }
 
   const fade = reduced ? { duration: 0 } : { duration: 0.2 };
@@ -77,16 +80,21 @@ export default function ForgotPasswordForm() {
   return (
     <PasswordShell
       eyebrow="Reset password"
-      title={sent ? 'Check your inbox' : 'Lost your password?'}
+      title={sent ? 'Timeout called' : 'Lost your password?'}
       subtitle={
         sent
-          ? 'The shot clock is reset. Follow the link in the email to pick a new password.'
-          : "Enter the email on your account and we'll send you a link to reset it."
+          ? 'Check your inbox. Follow the link in the email to pick a new password.'
+          : "Enter the email on your account and we'll draw up a reset link for you."
       }
-      swatKey={swatKey}
-      violationKey={violationKey}
-      settled={sent}
-      settledLabel="Reset"
+      shakeKey={violationKey}
+      scene={
+        <HuddleScene
+          progress={Math.min(1, email.trim().length / FULL_PLAY_CHARS)}
+          playKey={playKey}
+          settled={sent}
+          violationKey={violationKey}
+        />
+      }
     >
       <div aria-live="polite">
         <AnimatePresence mode="wait" initial={false}>
@@ -137,7 +145,7 @@ export default function ForgotPasswordForm() {
                 )}
               </Field>
               {error && <ErrorText>{error}</ErrorText>}
-              <SubmitButton loading={loading} loadingText="Sending...">
+              <SubmitButton loading={loading} loadingText="Calling timeout...">
                 Send reset link
               </SubmitButton>
             </motion.form>
