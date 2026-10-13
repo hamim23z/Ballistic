@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Footer() {
   return (
     <footer className="border-t border-court-line bg-court-ink px-5 py-10 sm:px-8">
@@ -21,9 +23,19 @@ export default function Footer() {
           any player. No team logos, player names, or likenesses are used.
         </p>
 
-        <p className="text-xs text-slate-600">
-          &copy; {new Date().getFullYear()} Ballistic
-        </p>
+        <div className="flex flex-col items-center gap-2 sm:items-end">
+          <nav aria-label="Legal" className="flex gap-4 text-xs">
+            <Link href="/terms" className="text-slate-400 transition-colors hover:text-ember-glow">
+              Terms
+            </Link>
+            <Link href="/privacy" className="text-slate-400 transition-colors hover:text-ember-glow">
+              Privacy
+            </Link>
+          </nav>
+          <p className="text-xs text-slate-600">
+            &copy; {new Date().getFullYear()} Ballistic
+          </p>
+        </div>
       </div>
     </footer>
   );
