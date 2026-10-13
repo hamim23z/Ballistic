@@ -20,6 +20,7 @@ import { useReducedMotion } from '@/lib/useReducedMotion';
 import { GUEST_STORAGE_KEY, useStoredGuestName } from '@/lib/useStoredGuestName';
 import JerseyPreview from '@/components/JerseyPreview';
 import TipOffOverlay, { TIP_OFF_MS } from '@/components/TipOffOverlay';
+import { createClient } from '@/lib/supabase/client';
 
 type CardId = 'guest' | 'account';
 type AccountMode = 'signin' | 'signup';
@@ -32,16 +33,19 @@ function PrimaryButton({
   children,
   type = 'button',
   onClick,
+  disabled = false,
 }: {
   children: ReactNode;
   type?: 'button' | 'submit';
   onClick?: () => void;
+  disabled?: boolean;
 }) {
   return (
     <button
       type={type}
       onClick={onClick}
-      className="group/btn relative w-full overflow-hidden rounded-lg bg-ember px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-ember/20 transition-all hover:-translate-y-0.5 hover:bg-ember-soft hover:shadow-ember/40 active:translate-y-0 focus-visible:rounded-lg! focus-visible:outline-none! focus-visible:ring-2 focus-visible:ring-ember-glow/70"
+      disabled={disabled}
+      className="group/btn relative w-full overflow-hidden rounded-lg bg-ember px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-ember/20 transition-all hover:-translate-y-0.5 hover:bg-ember-soft hover:shadow-ember/40 active:translate-y-0 focus-visible:rounded-lg! focus-visible:outline-none! focus-visible:ring-2 focus-visible:ring-ember-glow/70 disabled:pointer-events-none disabled:opacity-60"
     >
       <span
         aria-hidden="true"
@@ -163,6 +167,13 @@ export default function PlayCard() {
   const [showFreshGuestForm, setShowFreshGuestForm] = useState(false);
   const [tipOffActive, setTipOffActive] = useState(false);
   const [tipOffName, setTipOffName] = useState('');
+  const [signUpUsername, setSignUpUsername] = useState('');
+  const [signUpEmail, setSignUpEmail] = useState('');
+  const [signUpPassword, setSignUpPassword] = useState('');
+  const [signUpLoading, setSignUpLoading] = useState(false);
+  const [signUpError, setSignUpError] = useState<string | null>(null);
+  const [signUpPendingEmail, setSignUpPendingEmail] = useState<string | null>(null);
+  const [signedUpName, setSignedUpName] = useState<string | null>(null);
   const tipOffTimer = useRef<number | null>(null);
   const prefersReducedMotion = useReducedMotion();
   const storedGuestName = useStoredGuestName();
@@ -215,6 +226,46 @@ export default function PlayCard() {
 
   function handleAccountSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+  }
+
+  async function handleSignUpSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (signUpLoading) return;
+
+    const username = signUpUsername.trim();
+    const email = signUpEmail.trim();
+    if (!username || !email || !signUpPassword) return;
+
+    setSignUpLoading(true);
+    setSignUpError(null);
+
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password: signUpPassword,
+      options: {
+        data: { username },
+        emailRedirectTo: `${window.location.origin}/play`,
+      },
+    });
+
+    setSignUpLoading(false);
+
+    if (error) {
+      setSignUpError(error.message);
+      return;
+    }
+
+    setSignUpPassword('');
+
+    // No session means Supabase wants the user to confirm their email first.
+    if (!data.session) {
+      setSignUpPendingEmail(email);
+      return;
+    }
+
+    // Confirm email is off: the user is signed in right away.
+    setSignedUpName(username);
   }
 
   return (
@@ -329,30 +380,78 @@ export default function PlayCard() {
                 <PrimaryButton type="submit">Sign In</PrimaryButton>
               </motion.form>
             ) : (
-              <motion.form
+              <motion.div
                 key="signup"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.18 }}
-                onSubmit={handleAccountSubmit}
-                className="space-y-3"
               >
-                <input
-                  type="text"
-                  placeholder="Username"
-                  aria-label="Username"
-                  className={inputClass}
-                />
-                <input type="email" placeholder="Email" aria-label="Email" className={inputClass} />
-                <input
-                  type="password"
-                  placeholder="Password"
-                  aria-label="Password"
-                  className={inputClass}
-                />
-                <PrimaryButton type="submit">Create Account</PrimaryButton>
-              </motion.form>
+                {signedUpName ? (
+                  <p
+                    role="status"
+                    className="rounded-lg border border-ember/30 bg-ember/10 px-3 py-3 text-center text-sm text-ember-glow"
+                  >
+                    You&rsquo;re signed up &mdash; {signedUpName}
+                  </p>
+                ) : signUpPendingEmail ? (
+                  <div className="space-y-3" role="status">
+                    <p className="rounded-lg border border-ember/30 bg-ember/10 px-3 py-3 text-center text-sm text-ember-glow">
+                      Check your email. We sent a confirmation link to {signUpPendingEmail}.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setSignUpPendingEmail(null)}
+                      className="w-full text-center text-xs text-slate-500 transition-colors hover:text-slate-300"
+                    >
+                      Use a different email
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSignUpSubmit} className="space-y-3">
+                    <input
+                      type="text"
+                      value={signUpUsername}
+                      onChange={(event) => setSignUpUsername(event.target.value)}
+                      placeholder="Username"
+                      aria-label="Username"
+                      maxLength={24}
+                      required
+                      autoComplete="username"
+                      className={inputClass}
+                    />
+                    <input
+                      type="email"
+                      value={signUpEmail}
+                      onChange={(event) => setSignUpEmail(event.target.value)}
+                      placeholder="Email"
+                      aria-label="Email"
+                      required
+                      autoComplete="email"
+                      className={inputClass}
+                    />
+                    <input
+                      type="password"
+                      value={signUpPassword}
+                      onChange={(event) => setSignUpPassword(event.target.value)}
+                      placeholder="Password"
+                      aria-label="Password"
+                      minLength={6}
+                      required
+                      autoComplete="new-password"
+                      className={inputClass}
+                    />
+                    {signUpError && (
+                      <p role="alert" className="text-sm text-red-400">
+                        {signUpError}
+                      </p>
+                    )}
+                    <PrimaryButton type="submit" disabled={signUpLoading}>
+                      {signUpLoading ? 'Creating account…' : 'Create Account'}
+                    </PrimaryButton>
+                  </form>
+                )}
+              </motion.div>
             )}
           </AnimatePresence>
         </AccordionCard>

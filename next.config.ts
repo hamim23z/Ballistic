@@ -2,13 +2,18 @@ import type { NextConfig } from 'next';
 
 const isDev = process.env.NODE_ENV === 'development';
 
+// The browser talks to Supabase Auth directly, so its origin must be allowed.
+const supabaseOrigin = process.env.NEXT_PUBLIC_SUPABASE_URL
+  ? new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin
+  : '';
+
 const ContentSecurityPolicy = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self'",
   "img-src 'self' data: blob:",
-  "connect-src 'self'",
+  `connect-src 'self'${supabaseOrigin ? ` ${supabaseOrigin}` : ''}`,
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
