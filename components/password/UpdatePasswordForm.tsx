@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useReducedMotion } from '@/lib/useReducedMotion';
 import PasswordShell from '@/components/password/PasswordShell';
-import { SWAT_MS } from '@/components/password/ShotClockScene';
+import TunnelScene, { DOOR_MS } from '@/components/password/TunnelScene';
 import { ErrorText, Field, PasswordInput, SubmitButton } from '@/components/password/ui';
 
 const MIN_LENGTH = 8;
@@ -33,7 +33,7 @@ export default function UpdatePasswordForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
-  const [swatKey, setSwatKey] = useState(0);
+  const [openKey, setOpenKey] = useState(0);
   const [violationKey, setViolationKey] = useState(0);
   const timer = useRef<number | null>(null);
 
@@ -45,7 +45,9 @@ export default function UpdatePasswordForm() {
 
   const longEnough = password.length >= MIN_LENGTH;
   const matches = confirm.length > 0 && password === confirm;
-  const showMismatch = confirm.length > 0 && !matches;
+  // Still typing the confirmation and on track: not a mismatch yet.
+  const onTrack = confirm.length > 0 && !matches && password.startsWith(confirm);
+  const showMismatch = confirm.length > 0 && !matches && !onTrack;
 
   function fail(message: string) {
     setError(message);
@@ -69,13 +71,13 @@ export default function UpdatePasswordForm() {
       return;
     }
 
-    setSwatKey((k) => k + 1);
+    setOpenKey((k) => k + 1);
     timer.current = window.setTimeout(
       () => {
         setLoading(false);
         setDone(true);
       },
-      reduced ? 0 : SWAT_MS,
+      reduced ? 0 : DOOR_MS,
     );
   }
 
@@ -84,16 +86,23 @@ export default function UpdatePasswordForm() {
   return (
     <PasswordShell
       eyebrow="Change password"
-      title={done ? 'Password updated' : 'New possession'}
+      title={done ? 'Password updated' : 'Head to the locker room'}
       subtitle={
         done
-          ? "Your old password just got sent into the fifth row. Use the new one next time you sign in."
+          ? 'Your locker is cleared out and your jersey is waiting. Use the new password next time you sign in.'
           : 'Pick a new password for your account. You will use it the next time you sign in.'
       }
-      swatKey={swatKey}
-      violationKey={violationKey}
-      settled={done}
-      settledLabel="New possession"
+      shakeKey={violationKey}
+      scene={
+        <TunnelScene
+          charge={Math.min(1, password.length / MIN_LENGTH)}
+          ready={longEnough && matches}
+          mismatch={showMismatch}
+          openKey={openKey}
+          violationKey={violationKey}
+          settled={done}
+        />
+      }
     >
       <div aria-live="polite">
         <AnimatePresence mode="wait" initial={false}>
@@ -150,8 +159,10 @@ export default function UpdatePasswordForm() {
                 hint={
                   confirm.length === 0 ? undefined : matches ? (
                     <span className="text-ember-glow">✓ Passwords match</span>
+                  ) : onTrack ? (
+                    <span>Keep going&hellip;</span>
                   ) : (
-                    <span className="text-red-300">Passwords don&rsquo;t match yet</span>
+                    <span className="text-red-300">Passwords don&rsquo;t match</span>
                   )
                 }
               >

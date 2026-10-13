@@ -4,41 +4,35 @@ import Link from 'next/link';
 import { useEffect, type ReactNode } from 'react';
 import { useAnimate } from 'framer-motion';
 import { useReducedMotion } from '@/lib/useReducedMotion';
-import ShotClockScene from '@/components/password/ShotClockScene';
 
 type PasswordShellProps = {
   eyebrow: string;
   title: string;
   subtitle: string;
-  /** Plays the block animation each time it increments. */
-  swatKey: number;
-  /** Shakes the card and flashes the shot clock each time it increments. */
-  violationKey: number;
-  /** True once the form is in its confirmation state. */
-  settled: boolean;
-  settledLabel: string;
+  /** Shakes the card each time it increments (e.g. a form error). */
+  shakeKey: number;
+  /** The animated illustration shown beside the card. */
+  scene: ReactNode;
   children: ReactNode;
 };
 
 // Shared layout for /forgot-password and /update-password: the form card on
-// one side, the shot clock and backboard on the other.
+// one side, the page's animated scene on the other.
 export default function PasswordShell({
   eyebrow,
   title,
   subtitle,
-  swatKey,
-  violationKey,
-  settled,
-  settledLabel,
+  shakeKey,
+  scene,
   children,
 }: PasswordShellProps) {
   const reduced = useReducedMotion();
   const [cardRef, animate] = useAnimate<HTMLElement>();
 
   useEffect(() => {
-    if (violationKey === 0 || reduced || !cardRef.current) return;
+    if (shakeKey === 0 || reduced || !cardRef.current) return;
     animate(cardRef.current, { x: [0, -10, 9, -6, 4, 0] }, { duration: 0.45 });
-  }, [violationKey, reduced, animate, cardRef]);
+  }, [shakeKey, reduced, animate, cardRef]);
 
   return (
     <main className="grain relative isolate min-h-screen overflow-hidden">
@@ -114,14 +108,7 @@ export default function PasswordShell({
         </div>
 
         <div className="order-1 flex items-end justify-center px-10 pb-6 pt-24 sm:px-16 lg:order-2 lg:items-center lg:py-16">
-          <div className="w-full max-w-[16rem] sm:max-w-xs lg:max-w-xl">
-            <ShotClockScene
-              swatKey={swatKey}
-              violationKey={violationKey}
-              settled={settled}
-              settledLabel={settledLabel}
-            />
-          </div>
+          <div className="w-full max-w-[16rem] sm:max-w-xs lg:max-w-xl">{scene}</div>
         </div>
       </div>
     </main>
