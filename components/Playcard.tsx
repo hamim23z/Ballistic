@@ -178,6 +178,12 @@ export default function PlayCard() {
   const [signinemail, setSignInEmail] = useState<string>('')
   const [signinpassword, setSignInPassword] = useState<string>('')
 
+  //error and loading states
+  const [error, setError] = useState<string>('')
+  const [loading, setLoading] = useState<boolean>(false)
+  const [notice, setNotice] = useState<string>('')
+  
+
 
   useEffect(() => {
     return () => {
@@ -230,8 +236,29 @@ export default function PlayCard() {
   }
 
   //sign up function
-  function handleSignUpSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSignUpSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setError('')
+    setNotice('')
+    setLoading(true)
+    const supabase = createClient()
+
+    const {data, error: signUpError} = await supabase.auth.signUp({
+      email: email,
+      password: password,
+      options: {
+        data: {display_name: username},
+        emailRedirectTo: 'http://localhost:3000/play'
+      }
+    })
+
+    if (signUpError) {
+      setError(signUpError.message)
+    } 
+    else if (!data.session) {
+      setNotice('Check your email to confirm your account.')
+    }
+    setLoading(false)
   }
 
   return (
@@ -312,6 +339,8 @@ export default function PlayCard() {
             >
               Sign In
             </button>
+
+            
             <button
               type="button"
               onClick={() => setAccountMode('signup')}
@@ -395,6 +424,8 @@ export default function PlayCard() {
                   className={inputClass}
                 />
                 <PrimaryButton type="submit">Create Account</PrimaryButton>
+                {error && <p>{error}</p>}
+                {notice && <p>{notice}</p>}
               </motion.form>
             )}
           </AnimatePresence>

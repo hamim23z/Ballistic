@@ -8,7 +8,7 @@ const ContentSecurityPolicy = [
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self'",
   "img-src 'self' data: blob:",
-  "connect-src 'self'",
+  "connect-src 'self' https://grzcnjqnpqwvhkpzhjkr.supabase.co",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",
