@@ -4,7 +4,7 @@ import { rateLimit } from '@/lib/rateLimit';
 export const runtime = 'nodejs';
 
 const ALLOWED_ORIGINS = new Set([
-  'https://playballistic.com',
+  'http://localhost:3000/play',
   'http://localhost:3000',
 ]);
 

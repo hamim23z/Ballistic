@@ -20,6 +20,8 @@ import { useReducedMotion } from '@/lib/useReducedMotion';
 import { GUEST_STORAGE_KEY, useStoredGuestName } from '@/lib/useStoredGuestName';
 import JerseyPreview from '@/components/JerseyPreview';
 import TipOffOverlay, { TIP_OFF_MS } from '@/components/TipOffOverlay';
+import { createClient } from '@/lib/supabase/client';
+
 
 type CardId = 'guest' | 'account';
 type AccountMode = 'signin' | 'signup';
@@ -167,6 +169,16 @@ export default function PlayCard() {
   const prefersReducedMotion = useReducedMotion();
   const storedGuestName = useStoredGuestName();
 
+  //sign up states
+  const [username, setUsername] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+
+  //sign in states
+  const [signinemail, setSignInEmail] = useState<string>('')
+  const [signinpassword, setSignInPassword] = useState<string>('')
+
+
   useEffect(() => {
     return () => {
       if (tipOffTimer.current !== null) window.clearTimeout(tipOffTimer.current);
@@ -213,7 +225,12 @@ export default function PlayCard() {
     launchTipOff(guestName);
   }
 
-  function handleAccountSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSignInSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+  }
+
+  //sign up function
+  function handleSignUpSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
   }
 
@@ -309,44 +326,70 @@ export default function PlayCard() {
           </div>
 
           <AnimatePresence mode="wait" initial={false}>
-            {accountMode === 'signin' ? (
+            {accountMode === 'signin' ? 
+            
+            //sign in form
+            (
               <motion.form
                 key="signin"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.18 }}
-                onSubmit={handleAccountSubmit}
+                onSubmit={handleSignInSubmit}
                 className="space-y-3"
               >
-                <input type="email" placeholder="Email" aria-label="Email" className={inputClass} />
+                <input 
+                type="email"
+                value={signinemail}
+                onChange={(event) => setSignInEmail(event.target.value)}
+                placeholder="Email" 
+                aria-label="Email" 
+                className={inputClass} />
                 <input
                   type="password"
+                  value={signinpassword}
+                  onChange={(event) => setSignInPassword(event.target.value)}
                   placeholder="Password"
                   aria-label="Password"
                   className={inputClass}
                 />
                 <PrimaryButton type="submit">Sign In</PrimaryButton>
               </motion.form>
-            ) : (
+            ) : 
+            
+
+            //sign up form
+            (
               <motion.form
                 key="signup"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.18 }}
-                onSubmit={handleAccountSubmit}
+                onSubmit={handleSignUpSubmit}
                 className="space-y-3"
               >
                 <input
                   type="text"
+                  value={username}
+                  onChange={(event) => setUsername(event.target.value)}
                   placeholder="Username"
                   aria-label="Username"
                   className={inputClass}
                 />
-                <input type="email" placeholder="Email" aria-label="Email" className={inputClass} />
+                <input 
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  placeholder="Email" 
+                  aria-label="Email" 
+                  className={inputClass} 
+                />
                 <input
                   type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
                   placeholder="Password"
                   aria-label="Password"
                   className={inputClass}
