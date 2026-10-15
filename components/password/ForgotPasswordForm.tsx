@@ -8,30 +8,44 @@ import PasswordShell from '@/components/password/PasswordShell';
 import HuddleScene, { HUDDLE_MS } from '@/components/password/HuddleScene';
 import { ErrorText, Field, SubmitButton, inputClass } from '@/components/password/ui';
 
-//----------------------------------------------------------------------------------
-// PLACEHOLDER: send the reset email.
-// Swap the body for the real Supabase call, for example:
-//
-//   const supabase = createClient(); // from '@/lib/supabase/client'
-//   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-//     redirectTo: `${window.location.origin}/update-password`,
-//   });
-//   return { error: error ? error.message : null };
-//
-// Return { error: null } on success, or { error: 'message' } to show it on the form.
-async function sendResetLink(email: string): Promise<{ error: string | null }> {
-  void email;
-  await new Promise((resolve) => setTimeout(resolve, 600));
-  return { error: null };
+async function sendResetLink(identifier: string): Promise<{ error: string | null }> {
+  try {
+    const response = await fetch('/api/password/reset', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifier }),
+    });
+    if (response.ok) return { error: null };
+    const body = (await response.json().catch(() => null)) as { error?: string } | null;
+    return { error: body?.error ?? 'Something went wrong. Try again.' };
+  } catch {
+    return { error: 'Could not reach the server. Check your connection and try again.' };
+  }
 }
-//----------------------------------------------------------------------------------
+
+// Both entry points ask for the email or username and send a link; only the copy differs.
+const COPY = {
+  reset: {
+    eyebrow: 'Reset password',
+    title: 'Lost your password?',
+    subtitle: "Enter the email or username on your account and we'll draw up a reset link for you.",
+    button: 'Send reset link',
+  },
+  update: {
+    eyebrow: 'Change password',
+    title: 'Change your password',
+    subtitle: "Enter the email or username on your account and we'll email you a link to pick a new password.",
+    button: 'Email me a link',
+  },
+} as const;
 
 // Typing this many characters draws the whole play on the whiteboard.
 const FULL_PLAY_CHARS = 18;
 
-export default function ForgotPasswordForm() {
+export default function ForgotPasswordForm({ variant = 'reset' }: { variant?: keyof typeof COPY }) {
+  const copy = COPY[variant];
   const reduced = useReducedMotion();
-  const [email, setEmail] = useState('');
+  const [identifier, setIdentifier] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
@@ -51,7 +65,7 @@ export default function ForgotPasswordForm() {
     setError('');
     setLoading(true);
 
-    const result = await sendResetLink(email.trim());
+    const result = await sendResetLink(identifier.trim());
 
     if (result.error) {
       setError(result.error);
@@ -79,17 +93,17 @@ export default function ForgotPasswordForm() {
 
   return (
     <PasswordShell
-      eyebrow="Reset password"
-      title={sent ? 'Timeout called' : 'Lost your password?'}
+      eyebrow={copy.eyebrow}
+      title={sent ? 'Timeout called' : copy.title}
       subtitle={
         sent
           ? 'Check your inbox. Follow the link in the email to pick a new password.'
-          : "Enter the email on your account and we'll draw up a reset link for you."
+          : copy.subtitle
       }
       shakeKey={violationKey}
       scene={
         <HuddleScene
-          progress={Math.min(1, email.trim().length / FULL_PLAY_CHARS)}
+          progress={Math.min(1, identifier.trim().length / FULL_PLAY_CHARS)}
           playKey={playKey}
           settled={sent}
           violationKey={violationKey}
@@ -108,8 +122,8 @@ export default function ForgotPasswordForm() {
               className="space-y-4"
             >
               <p className="rounded-lg border border-ember/30 bg-ember/10 px-4 py-3 text-sm text-ember-glow">
-                If an account exists for <span className="font-semibold text-white">{email.trim()}</span>, a
-                reset link is on its way.
+                If an account exists for <span className="font-semibold text-white">{identifier.trim()}</span>, a
+                link is on its way to the email on file.
               </p>
               <button
                 type="button"
@@ -129,15 +143,18 @@ export default function ForgotPasswordForm() {
               onSubmit={handleSubmit}
               className="space-y-4"
             >
-              <Field label="Email">
+              <Field label="Email or username">
                 {(id) => (
                   <input
                     id={id}
-                    type="email"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    placeholder="you@example.com"
-                    autoComplete="email"
+                    type="text"
+                    value={identifier}
+                    onChange={(event) => setIdentifier(event.target.value)}
+                    placeholder="you@example.com or your username"
+                    autoComplete="username"
+                    autoCapitalize="none"
+                    spellCheck={false}
+                    maxLength={254}
                     required
                     aria-invalid={error ? true : undefined}
                     className={inputClass}
@@ -146,7 +163,7 @@ export default function ForgotPasswordForm() {
               </Field>
               {error && <ErrorText>{error}</ErrorText>}
               <SubmitButton loading={loading} loadingText="Calling timeout...">
-                Send reset link
+                {copy.button}
               </SubmitButton>
             </motion.form>
           )}

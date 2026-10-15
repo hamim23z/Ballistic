@@ -10,29 +10,33 @@ import { ErrorText, Field, PasswordInput, SubmitButton } from '@/components/pass
 
 const MIN_LENGTH = 8;
 
-//----------------------------------------------------------------------------------
-// PLACEHOLDER: save the new password for the signed-in user.
-// Swap the body for the real Supabase call, for example:
-//
-//   const supabase = createClient(); // from '@/lib/supabase/client'
-//   const { error } = await supabase.auth.updateUser({ password });
-//   return { error: error ? error.message : null };
-//
-// Return { error: null } on success, or { error: 'message' } to show it on the form.
-async function updatePassword(password: string): Promise<{ error: string | null }> {
-  void password;
-  await new Promise((resolve) => setTimeout(resolve, 600));
-  return { error: null };
-}
-//----------------------------------------------------------------------------------
+type UpdateResult = { error: string | null; expired?: boolean };
 
-export default function UpdatePasswordForm() {
+async function updatePassword(tokenHash: string, password: string): Promise<UpdateResult> {
+  try {
+    const response = await fetch('/api/password/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tokenHash, password }),
+    });
+    if (response.ok) return { error: null };
+    const body = (await response.json().catch(() => null)) as { error?: string; expired?: boolean } | null;
+    return { error: body?.error ?? 'Something went wrong. Try again.', expired: body?.expired };
+  } catch {
+    return { error: 'Could not reach the server. Check your connection and try again.' };
+  }
+}
+
+// Shown after someone follows the link in their reset email. tokenHash is the
+// one-time token from that link; it is checked when the new password is saved.
+export default function UpdatePasswordForm({ tokenHash }: { tokenHash: string }) {
   const reduced = useReducedMotion();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState(false);
+  const [expired, setExpired] = useState(false);
   const [openKey, setOpenKey] = useState(0);
   const [violationKey, setViolationKey] = useState(0);
   const timer = useRef<number | null>(null);
@@ -63,9 +67,10 @@ export default function UpdatePasswordForm() {
     if (password !== confirm) return fail("Those passwords don't match.");
 
     setLoading(true);
-    const result = await updatePassword(password);
+    const result = await updatePassword(tokenHash, password);
 
     if (result.error) {
+      if (result.expired) setExpired(true);
       fail(result.error);
       setLoading(false);
       return;
@@ -89,7 +94,7 @@ export default function UpdatePasswordForm() {
       title={done ? 'Password updated' : 'Head to the locker room'}
       subtitle={
         done
-          ? 'Your locker is cleared out and your jersey is waiting. Use the new password next time you sign in.'
+          ? 'Your locker is cleared out and your jersey is waiting. You are signed in with your new password.'
           : 'Pick a new password for your account. You will use it the next time you sign in.'
       }
       shakeKey={violationKey}
@@ -179,9 +184,18 @@ export default function UpdatePasswordForm() {
               </Field>
 
               {error && <ErrorText>{error}</ErrorText>}
-              <SubmitButton loading={loading} loadingText="Saving...">
-                Update password
-              </SubmitButton>
+              {expired ? (
+                <Link
+                  href="/forgot-password"
+                  className="block w-full rounded-lg bg-ember px-4 py-3 text-center text-sm font-semibold text-white shadow-lg shadow-ember/20 transition-all hover:-translate-y-0.5 hover:bg-ember-soft"
+                >
+                  Send a new link
+                </Link>
+              ) : (
+                <SubmitButton loading={loading} loadingText="Saving...">
+                  Update password
+                </SubmitButton>
+              )}
             </motion.form>
           )}
         </AnimatePresence>
