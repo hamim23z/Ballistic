@@ -1,5 +1,4 @@
 'use client';
-
 import Link from 'next/link';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -7,23 +6,8 @@ import { useReducedMotion } from '@/lib/useReducedMotion';
 import PasswordShell from '@/components/password/PasswordShell';
 import HuddleScene, { HUDDLE_MS } from '@/components/password/HuddleScene';
 import { ErrorText, Field, SubmitButton, inputClass } from '@/components/password/ui';
+import { createClient } from '@/lib/supabase/client';
 
-async function sendResetLink(identifier: string): Promise<{ error: string | null }> {
-  try {
-    const response = await fetch('/api/password/reset', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ identifier }),
-    });
-    if (response.ok) return { error: null };
-    const body = (await response.json().catch(() => null)) as { error?: string } | null;
-    return { error: body?.error ?? 'Something went wrong. Try again.' };
-  } catch {
-    return { error: 'Could not reach the server. Check your connection and try again.' };
-  }
-}
-
-// Both entry points ask for the email or username and send a link; only the copy differs.
 const COPY = {
   reset: {
     eyebrow: 'Reset password',
@@ -45,12 +29,8 @@ const FULL_PLAY_CHARS = 18;
 export default function ForgotPasswordForm({ variant = 'reset' }: { variant?: keyof typeof COPY }) {
   const copy = COPY[variant];
   const reduced = useReducedMotion();
-  const [identifier, setIdentifier] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const [sent, setSent] = useState(false);
   const [playKey, setPlayKey] = useState(0);
-  const [violationKey, setViolationKey] = useState(0);
   const timer = useRef<number | null>(null);
 
   useEffect(() => {
@@ -59,30 +39,41 @@ export default function ForgotPasswordForm({ variant = 'reset' }: { variant?: ke
     };
   }, []);
 
+  //----------------------------------------------------------------------------------
+  //reset password states
+  const [violationKey, setViolationKey] = useState(0);
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [identifier, setIdentifier] = useState('');
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (loading) return;
     setError('');
     setLoading(true);
+    const supabase = createClient()
+    
+    const {error: resetpassError} = await supabase.auth.resetPasswordForEmail(identifier, {
+      redirectTo: 'http://localhost:3000/'
+    })
 
-    const result = await sendResetLink(identifier.trim());
-
-    if (result.error) {
-      setError(result.error);
-      setViolationKey((k) => k + 1);
-      setLoading(false);
-      return;
+    if (resetpassError) {
+      setError(resetpassError.message)
+      setViolationKey((k) => k+1)
+      setLoading(false)
     }
-
-    setPlayKey((k) => k + 1);
-    timer.current = window.setTimeout(
-      () => {
-        setLoading(false);
-        setSent(true);
-      },
-      reduced ? 0 : HUDDLE_MS,
-    );
+    else {
+      setPlayKey((k) => k + 1);
+      timer.current = window.setTimeout(
+        () => {
+          setLoading(false);
+          setSent(true);
+        },
+        reduced ? 0 : HUDDLE_MS,
+      );
+    }
   }
+  //----------------------------------------------------------------------------------
 
   function handleSendAgain() {
     setSent(false);
