@@ -8,6 +8,7 @@ import {
   type PointerEvent,
   type ReactNode,
 } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
   AnimatePresence,
@@ -159,6 +160,7 @@ function AccordionCard({
 }
 
 export default function PlayCard() {
+  const router = useRouter()
   const [activeCard, setActiveCard] = useState<CardId>('guest');
   const [accountMode, setAccountMode] = useState<AccountMode>('signin');
   const [guestName, setGuestName] = useState('');
@@ -236,9 +238,10 @@ export default function PlayCard() {
   function handleGuestSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     launchTipOff(guestName);
+    router.push('/court')
   }
 
-  //----------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------
   //sign in function
   async function handleSignInSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -255,12 +258,12 @@ export default function PlayCard() {
     if (signinError) {
       setErrorSignIn(signinError.message)
     }
-    else if (!data.session) {
-      setNoticeSignIn('Successfully signed in.')
+    else {
+      router.push('/court')
     }
     setLoadingSignIn(false)
   }
-  //----------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------
 
 
 //----------------------------------------------------------------------------------
@@ -286,6 +289,7 @@ export default function PlayCard() {
     } 
     else if (!data.session) {
       setNotice('Check your email to confirm your account.')
+      router.push('/court')
     }
     setLoading(false)
   }
