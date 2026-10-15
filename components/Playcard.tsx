@@ -8,6 +8,7 @@ import {
   type PointerEvent,
   type ReactNode,
 } from 'react';
+import Link from 'next/link';
 import {
   AnimatePresence,
   motion,
@@ -413,6 +414,20 @@ export default function PlayCard() {
                   aria-label="Password"
                   className={inputClass}
                 />
+                <div className="flex justify-between gap-4 text-xs">
+                  <Link
+                    href="/forgot-password"
+                    className="text-slate-400 transition-colors hover:text-ember-glow"
+                  >
+                    Forgot password?
+                  </Link>
+                  <Link
+                    href="/update-password"
+                    className="text-slate-400 transition-colors hover:text-ember-glow"
+                  >
+                    Change password
+                  </Link>
+                </div>
                 <PrimaryButton type="submit">Sign In</PrimaryButton>
                 {errorsignin && <p>{errorsignin}</p>}
                 {noticesignin && <p>{noticesignin}</p>}
