@@ -1,20 +1,58 @@
-export type PositionId = 'PG' | 'SG' | 'SF' | 'PF' | 'C';
+export type PositionId = "PG" | "SG" | "SF" | "PF" | "C";
 
 export type CourtPosition = {
   id: PositionId;
   name: string;
-  /** Spot on the court, in the court SVG's 500 x 470 coordinate space. */
   x: number;
   y: number;
-  /** Game mode copy shown in the dialog. Left blank on purpose: fill these in. */
   modeTitle: string;
   modeDescription: string;
 };
 
 export const POSITIONS: CourtPosition[] = [
-  { id: 'PG', name: 'Point Guard', x: 250, y: 372, modeTitle: '', modeDescription: '' },
-  { id: 'SG', name: 'Shooting Guard', x: 418, y: 262, modeTitle: '', modeDescription: '' },
-  { id: 'SF', name: 'Small Forward', x: 82, y: 262, modeTitle: '', modeDescription: '' },
-  { id: 'PF', name: 'Power Forward', x: 342, y: 150, modeTitle: '', modeDescription: '' },
-  { id: 'C', name: 'Center', x: 168, y: 104, modeTitle: '', modeDescription: '' },
+  {
+    id: "PG",
+    name: "82-0",
+    x: 250,
+    y: 372,
+    modeTitle: "82-0",
+    modeDescription:
+      "Draft the best five-man lineup in basketball history from the 1940s to today. Build a team good enough to win every game of the season.",
+  },
+  {
+    id: "SG",
+    name: "0-82",
+    x: 418,
+    y: 262,
+    modeTitle: "0-82",
+    modeDescription:
+      "The reverse challenge. Not as easy as it seems. Draft the worst lineup you can and try to lose every single game.",
+  },
+  {
+    id: "SF",
+    name: "Simulate",
+    x: 82,
+    y: 262,
+    modeTitle: "Simulate",
+    modeDescription:
+      "Pick your five, then play out a full 82-game season + playoffs and see what record your team actually earns and if you can win the championship.",
+  },
+  {
+    id: "PF",
+    name: "Pass Chain",
+    x: 342,
+    y: 150,
+    modeTitle: "Pass Chain",
+    modeDescription:
+      "Connect two players through the teammates they shared. Find the shortest chain you can, one link at a time.",
+  },
+  {
+    id: "C",
+    name: "Mystery Player",
+    x: 168,
+    y: 104,
+    modeTitle: "Mystery Player",
+    modeDescription:
+      "A hidden player, a handful of clues. Use their stats, teams and draft year to name them in as few guesses as possible.",
+  },
 ];
