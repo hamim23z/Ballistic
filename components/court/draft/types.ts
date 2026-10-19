@@ -6,6 +6,16 @@ export type DraftPlayer = {
   team: string;
   era: string;
   positions: PositionId[];
+  stats: PlayerStats;
+};
+
+/** Per-game averages. null shows as a dash (e.g. not tracked in that era). */
+export type PlayerStats = {
+  ppg: number | null;
+  apg: number | null;
+  rpg: number | null;
+  spg: number | null;
+  bpg: number | null;
 };
 
 /** What one spin lands on: a franchise in a given era, e.g. 1990s Bulls. */

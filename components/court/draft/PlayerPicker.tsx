@@ -4,6 +4,7 @@ import type { PositionId } from '@/components/court/modes';
 import { spinLabel, type DraftPlayer, type DraftSpin } from '@/components/court/draft/types';
 import { initials } from '@/components/court/draft/DraftCourt';
 import SpinReel from '@/components/court/draft/SpinReel';
+import StatLine from '@/components/court/draft/StatLine';
 
 // Side panel for the active slot: spin for a team-era, then pick one player
 // from that roster.
@@ -93,56 +94,59 @@ export default function PlayerPicker({
                     type="button"
                     onClick={() => onPick(player)}
                     disabled={drafted || !active}
-                    className="group/player flex w-full items-center gap-3 rounded-xl border border-court-line bg-court-navy/60 p-3 text-left transition-[border-color,background-color,transform] duration-200 enabled:hover:-translate-y-0.5 enabled:hover:border-ember/50 enabled:hover:bg-court-navy disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-offset-[-2px]!"
+                    className="group/player block w-full rounded-xl border border-court-line bg-court-navy/60 p-3 text-left transition-[border-color,background-color,transform] duration-200 enabled:hover:-translate-y-0.5 enabled:hover:border-ember/50 enabled:hover:bg-court-navy disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-offset-[-2px]!"
                   >
-                    <span
-                      aria-hidden="true"
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-court-line bg-court-ink font-display text-sm font-bold text-ember-glow transition-colors group-enabled/player:group-hover/player:border-ember"
-                    >
-                      {initials(player.name)}
-                    </span>
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate font-display text-sm font-bold text-white sm:text-base">
-                        {player.name}
+                    <span className="flex items-center gap-3">
+                      <span
+                        aria-hidden="true"
+                        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-court-line bg-court-ink font-display text-sm font-bold text-ember-glow transition-colors group-enabled/player:group-hover/player:border-ember"
+                      >
+                        {initials(player.name)}
                       </span>
-                      <span className="mt-1 flex flex-wrap items-center gap-1.5">
-                        <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                          {player.era} {player.team}
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-display text-sm font-bold text-white sm:text-base">
+                          {player.name}
                         </span>
-                        {player.positions.map((pos) => (
+                        <span className="mt-1 flex flex-wrap items-center gap-1.5">
+                          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                            {player.era} {player.team}
+                          </span>
+                          {player.positions.map((pos) => (
+                            <span
+                              key={pos}
+                              className={[
+                                'rounded px-1.5 py-px text-[10px] font-bold',
+                                pos === active ? 'bg-ember/20 text-ember-glow' : 'bg-court-line/70 text-slate-400',
+                              ].join(' ')}
+                            >
+                              {pos}
+                            </span>
+                          ))}
+                        </span>
+                      </span>
+                      <span className="shrink-0 text-xs font-semibold">
+                        {drafted ? (
+                          <span className="flex items-center gap-1 text-slate-400">
+                            <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" aria-hidden="true">
+                              <path d="M3 8.5l3 3 7-7" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            Drafted
+                          </span>
+                        ) : active ? (
                           <span
-                            key={pos}
                             className={[
-                              'rounded px-1.5 py-px text-[10px] font-bold',
-                              pos === active ? 'bg-ember/20 text-ember-glow' : 'bg-court-line/70 text-slate-400',
+                              'rounded-md border px-2 py-1 transition-colors group-hover/player:border-ember group-hover/player:bg-ember group-hover/player:text-white',
+                              fits ? 'border-ember/50 text-ember-glow' : 'border-court-line text-slate-300',
                             ].join(' ')}
                           >
-                            {pos}
+                            <span className="sr-only">Add to </span>
+                            <span aria-hidden="true">+ </span>
+                            {active}
                           </span>
-                        ))}
+                        ) : null}
                       </span>
                     </span>
-                    <span className="shrink-0 text-xs font-semibold">
-                      {drafted ? (
-                        <span className="flex items-center gap-1 text-slate-400">
-                          <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" aria-hidden="true">
-                            <path d="M3 8.5l3 3 7-7" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                          Drafted
-                        </span>
-                      ) : active ? (
-                        <span
-                          className={[
-                            'rounded-md border px-2 py-1 transition-colors group-hover/player:border-ember group-hover/player:bg-ember group-hover/player:text-white',
-                            fits ? 'border-ember/50 text-ember-glow' : 'border-court-line text-slate-300',
-                          ].join(' ')}
-                        >
-                          <span className="sr-only">Add to </span>
-                          <span aria-hidden="true">+ </span>
-                          {active}
-                        </span>
-                      ) : null}
-                    </span>
+                    <StatLine stats={player.stats} />
                   </button>
                 </li>
               );
