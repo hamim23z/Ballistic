@@ -93,7 +93,9 @@ export default function DraftResults({
             <li key={position.id} className="flex items-center gap-3 px-4 py-2.5 text-sm">
               <span className="w-7 font-display font-bold text-ember-glow">{position.id}</span>
               <span className="min-w-0 flex-1 truncate text-white">{lineup[position.id]?.name}</span>
-              <span className="text-xs text-slate-500">{lineup[position.id]?.era}</span>
+              <span className="shrink-0 text-xs text-slate-500">
+                {lineup[position.id]?.era} {lineup[position.id]?.team}
+              </span>
             </li>
           ))}
         </ul>

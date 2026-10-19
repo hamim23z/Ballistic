@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import DraftBoard from '@/components/court/draft/DraftBoard';
-import { PLACEHOLDER_PLAYERS, PLACEHOLDER_RESULT } from '@/components/court/draft/placeholder';
+import { PLACEHOLDER_PLAYERS, PLACEHOLDER_RESULT, PLACEHOLDER_SPINS } from '@/components/court/draft/placeholder';
 
 export const metadata: Metadata = {
   title: '82-0 Draft',
-  description: 'Draft a five-man lineup from any era and see if it can go 82-0.',
+  description: 'Spin for a team and era, draft a five-man lineup and see if it can go 82-0.',
 };
 
 export default function DraftPage() {
@@ -49,7 +49,7 @@ export default function DraftPage() {
       </header>
 
       <div className="relative z-10 mx-auto grid max-w-7xl gap-8 px-5 pb-10 pt-8 sm:px-10 lg:h-[calc(100vh-4rem)] lg:min-h-[720px] lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-10 lg:pt-6 xl:grid-cols-[minmax(0,1fr)_420px]">
-        <DraftBoard players={PLACEHOLDER_PLAYERS} result={PLACEHOLDER_RESULT} />
+        <DraftBoard players={PLACEHOLDER_PLAYERS} spinOptions={PLACEHOLDER_SPINS} result={PLACEHOLDER_RESULT} />
       </div>
     </main>
   );

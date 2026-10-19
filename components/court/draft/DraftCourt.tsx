@@ -2,7 +2,7 @@
 
 import HalfCourt from '@/components/court/HalfCourt';
 import { POSITIONS, type PositionId } from '@/components/court/modes';
-import type { Lineup } from '@/components/court/draft/types';
+import { shortSpinLabel, type Lineup, type Spins } from '@/components/court/draft/types';
 
 export function initials(name: string) {
   return name
@@ -18,12 +18,14 @@ export function initials(name: string) {
 // player's initials, name and a remove button.
 export default function DraftCourt({
   lineup,
+  spins,
   active,
   locked,
   onSelect,
   onRemove,
 }: {
   lineup: Lineup;
+  spins: Spins;
   active: PositionId | null;
   locked: boolean;
   onSelect: (id: PositionId) => void;
@@ -39,6 +41,7 @@ export default function DraftCourt({
       <ul className="absolute inset-0" aria-label="Your lineup">
         {POSITIONS.map((position, index) => {
           const player = lineup[position.id];
+          const spin = spins[position.id];
           const isActive = active === position.id && !locked;
           return (
             <li
@@ -99,8 +102,10 @@ export default function DraftCourt({
                         <span className="sm:hidden">{player.name.split(' ').at(-1)}</span>
                         <span className="max-sm:hidden">{player.name}</span>
                       </>
+                    ) : spin ? (
+                      <span className="text-ember-glow">{shortSpinLabel(spin)}</span>
                     ) : isActive ? (
-                      'Picking…'
+                      'Spin…'
                     ) : (
                       'Empty'
                     )}

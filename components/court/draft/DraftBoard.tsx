@@ -5,13 +5,14 @@ import DraftCourt from '@/components/court/draft/DraftCourt';
 import PlayerPicker from '@/components/court/draft/PlayerPicker';
 import DraftResults from '@/components/court/draft/DraftResults';
 import { POSITIONS, type PositionId } from '@/components/court/modes';
-import type { DraftPlayer, DraftResult, Lineup } from '@/components/court/draft/types';
+import { spinLabel, type DraftPlayer, type DraftResult, type DraftSpin, type Lineup, type Spins } from '@/components/court/draft/types';
 
 const ORDER = POSITIONS.map((p) => p.id);
 
 const EMPTY_LINEUP: Lineup = { PG: null, SG: null, SF: null, PF: null, C: null };
+const NO_SPINS: Spins = { PG: null, SG: null, SF: null, PF: null, C: null };
 
-type Snapshot = { lineup: Lineup; active: PositionId | null };
+type Snapshot = { lineup: Lineup; spins: Spins; active: PositionId | null };
 
 // The next empty slot after `from`, wrapping around; null when all are filled.
 function nextEmpty(lineup: Lineup, from: PositionId | null): PositionId | null {
@@ -25,12 +26,15 @@ function nextEmpty(lineup: Lineup, from: PositionId | null): PositionId | null {
 
 export default function DraftBoard({
   players,
+  spinOptions,
   result,
 }: {
   players: DraftPlayer[];
+  spinOptions: DraftSpin[];
   result: DraftResult;
 }) {
   const [lineup, setLineup] = useState<Lineup>(EMPTY_LINEUP);
+  const [spins, setSpins] = useState<Spins>(NO_SPINS);
   const [active, setActive] = useState<PositionId | null>('PG');
   const [history, setHistory] = useState<Snapshot[]>([]);
   const [submitted, setSubmitted] = useState(false);
@@ -48,9 +52,10 @@ export default function DraftBoard({
     resultsHeading.current?.focus({ preventScroll: true });
   }, [submitted]);
 
-  function commit(next: Lineup, nextActive: PositionId | null, message: string) {
-    setHistory((prev) => [...prev, { lineup, active }]);
+  function commit(next: Lineup, nextActive: PositionId | null, message: string, nextSpins = spins) {
+    setHistory((prev) => [...prev, { lineup, spins, active }]);
     setLineup(next);
+    setSpins(nextSpins);
     setActive(nextActive);
     setAnnouncement(message);
   }
@@ -59,6 +64,11 @@ export default function DraftBoard({
     if (!active) return;
     const next = { ...lineup, [active]: player };
     commit(next, nextEmpty(next, active), `${player.name} added at ${active}.`);
+  }
+
+  function spun(spin: DraftSpin) {
+    if (!active) return;
+    commit(lineup, active, `${active} spin landed on the ${spinLabel(spin)}.`, { ...spins, [active]: spin });
   }
 
   function remove(id: PositionId) {
@@ -72,16 +82,18 @@ export default function DraftBoard({
     if (!last) return;
     setHistory((prev) => prev.slice(0, -1));
     setLineup(last.lineup);
+    setSpins(last.spins);
     setActive(last.active);
     setAnnouncement('Last change undone.');
   }
 
   function clear() {
-    commit(EMPTY_LINEUP, 'PG', 'Lineup cleared.');
+    commit(EMPTY_LINEUP, 'PG', 'Lineup cleared.', NO_SPINS);
   }
 
   function restart() {
     setLineup(EMPTY_LINEUP);
+    setSpins(NO_SPINS);
     setActive('PG');
     setHistory([]);
     setSubmitted(false);
@@ -95,7 +107,7 @@ export default function DraftBoard({
           className="text-xs font-semibold uppercase tracking-[0.3em] text-ember-glow"
           style={{ animation: 'rise 0.7s ease-out both' }}
         >
-          82-0 · Draft
+          82-0 · Spin &amp; draft
         </p>
         <h1
           id="draft-heading"
@@ -108,6 +120,7 @@ export default function DraftBoard({
         <div className="mt-6 flex min-h-0 flex-1 items-center">
           <DraftCourt
             lineup={lineup}
+            spins={spins}
             active={active}
             locked={submitted}
             onSelect={setActive}
@@ -151,7 +164,7 @@ export default function DraftBoard({
             <button
               type="button"
               onClick={clear}
-              disabled={filled === 0 || submitted}
+              disabled={(filled === 0 && !ORDER.some((id) => spins[id])) || submitted}
               className="rounded-lg border border-court-line px-3 py-2 text-sm font-semibold text-slate-300 transition-colors enabled:hover:border-ember/60 enabled:hover:text-white disabled:opacity-40 max-sm:flex-1"
             >
               Clear
@@ -188,7 +201,15 @@ export default function DraftBoard({
             onRestart={restart}
           />
         ) : (
-          <PlayerPicker players={players} active={active} draftedIds={draftedIds} onPick={pick} />
+          <PlayerPicker
+            players={players}
+            spinOptions={spinOptions}
+            active={active}
+            spin={active ? spins[active] : null}
+            draftedIds={draftedIds}
+            onSpun={spun}
+            onPick={pick}
+          />
         )}
       </div>
 
