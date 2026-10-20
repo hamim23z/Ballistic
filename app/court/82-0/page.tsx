@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import DraftBoard from '@/components/court/draft/DraftBoard';
+import { MODE_82_0 } from '@/components/court/draft/copy';
 import { PLACEHOLDER_PLAYERS, PLACEHOLDER_RESULT, PLACEHOLDER_SPINS } from '@/components/court/draft/placeholder';
 
 export const metadata: Metadata = {
@@ -49,7 +50,7 @@ export default function DraftPage() {
       </header>
 
       <div className="relative z-10 mx-auto grid max-w-7xl gap-8 px-5 pb-10 pt-8 sm:px-10 lg:h-[calc(100vh-4rem)] lg:min-h-[720px] lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-10 lg:pt-6 xl:grid-cols-[minmax(0,1fr)_420px]">
-        <DraftBoard players={PLACEHOLDER_PLAYERS} spinOptions={PLACEHOLDER_SPINS} result={PLACEHOLDER_RESULT} />
+        <DraftBoard players={PLACEHOLDER_PLAYERS} spinOptions={PLACEHOLDER_SPINS} result={PLACEHOLDER_RESULT} mode={MODE_82_0} />
       </div>
     </main>
   );
