@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useId, useRef, type MouseEvent } from 'react';
+import { useRouter } from 'next/navigation';
 import type { CourtPosition } from '@/components/court/modes';
 
 // Native <dialog> opened with showModal(): the browser handles Escape, focus
@@ -15,6 +16,7 @@ export default function GameModeDialog({
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const titleId = useId();
+  const router = useRouter();
 
   useEffect(() => {
     const dialog = ref.current;
@@ -83,6 +85,7 @@ export default function GameModeDialog({
 
           <button
             type="button"
+            onClick={() => position.href && router.push(position.href)}
             className="group/btn relative mt-7 w-full overflow-hidden rounded-lg bg-ember px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-ember/20 transition-all hover:-translate-y-0.5 hover:bg-ember-soft hover:shadow-ember/40 active:translate-y-0 focus-visible:rounded-lg! focus-visible:outline-none! focus-visible:ring-2 focus-visible:ring-ember-glow/70"
           >
             <span

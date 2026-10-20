@@ -7,6 +7,8 @@ export type CourtPosition = {
   y: number;
   modeTitle: string;
   modeDescription: string;
+  /** Where the dialog's Start button goes. Modes without one do nothing yet. */
+  href?: string;
 };
 
 export const POSITIONS: CourtPosition[] = [
@@ -16,6 +18,7 @@ export const POSITIONS: CourtPosition[] = [
     x: 250,
     y: 372,
     modeTitle: "82-0",
+    href: "/court/82-0",
     modeDescription:
       "Draft the best five-man lineup in basketball history from the 1940s to today. Build a team good enough to win every game of the season.",
   },
