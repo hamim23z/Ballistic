@@ -5,6 +5,7 @@ import DraftCourt from '@/components/court/draft/DraftCourt';
 import PlayerPicker from '@/components/court/draft/PlayerPicker';
 import DraftResults from '@/components/court/draft/DraftResults';
 import { POSITIONS, type PositionId } from '@/components/court/modes';
+import type { DraftMode } from '@/components/court/draft/copy';
 import { spinLabel, type DraftPlayer, type DraftResult, type DraftSpin, type Lineup } from '@/components/court/draft/types';
 
 const ORDER = POSITIONS.map((p) => p.id);
@@ -15,10 +16,12 @@ export default function DraftBoard({
   players,
   spinOptions,
   result,
+  mode,
 }: {
   players: DraftPlayer[];
   spinOptions: DraftSpin[];
   result: DraftResult;
+  mode: DraftMode;
 }) {
   const [lineup, setLineup] = useState<Lineup>(EMPTY_LINEUP);
   const [spin, setSpin] = useState<DraftSpin | null>(null);
@@ -107,15 +110,32 @@ export default function DraftBoard({
           className="text-xs font-semibold uppercase tracking-[0.3em] text-ember-glow"
           style={{ animation: 'rise 0.7s ease-out both' }}
         >
-          82-0 · Spin &amp; draft
+          {mode.eyebrow}
         </p>
-        <h1
-          id="draft-heading"
-          className="mt-3 font-display text-4xl font-bold leading-tight text-white sm:text-5xl"
-          style={{ animation: 'rise 0.8s ease-out 0.1s both' }}
-        >
-          Draft your <span className="text-gradient">five</span>.
-        </h1>
+        <div className="mt-3 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between lg:gap-6">
+          <h1
+            id="draft-heading"
+            className="font-display text-4xl font-bold leading-tight text-white sm:text-5xl"
+            style={{ animation: 'rise 0.8s ease-out 0.1s both' }}
+          >
+            {mode.headline.before}
+            <span className="text-gradient">{mode.headline.accent}</span>
+            {mode.headline.after}
+          </h1>
+          {/* Beside the headline on desktop so the court keeps its height; one sentence per line there. */}
+          {mode.tagline && (
+            <p
+              className="text-base font-semibold text-slate-400 lg:shrink-0 lg:pb-1.5 lg:text-right lg:text-sm lg:leading-snug"
+              style={{ animation: 'rise 0.8s ease-out 0.15s both' }}
+            >
+              {mode.tagline.split(/(?<=\.)\s+/).map((sentence) => (
+                <span key={sentence} className="lg:block">
+                  {sentence}{' '}
+                </span>
+              ))}
+            </p>
+          )}
+        </div>
 
         <div className="mt-6 flex min-h-0 flex-1 items-center">
           <DraftCourt lineup={lineup} moving={moving} openFor={openFor} locked={submitted} onSelect={selectSlot} />
@@ -154,7 +174,7 @@ export default function DraftBoard({
               aria-hidden="true"
               className="pointer-events-none absolute inset-y-0 -left-1/2 w-1/3 -skew-x-12 bg-white/30 duration-0 transition-transform ease-out group-enabled/btn:group-hover/btn:translate-x-[450%] group-enabled/btn:group-hover/btn:duration-700 motion-reduce:hidden"
             />
-            <span className="relative">{submitted ? 'Submitted' : 'Finalize lineup'}</span>
+            <span className="relative">{submitted ? mode.submitted : mode.finalize}</span>
           </button>
           {moverName ? (
             <div
@@ -186,6 +206,7 @@ export default function DraftBoard({
         {submitted ? (
           <DraftResults
             result={result}
+            mode={mode}
             lineup={lineup}
             headingRef={resultsHeading}
             onEdit={() => setSubmitted(false)}
@@ -195,6 +216,7 @@ export default function DraftBoard({
           <PlayerPicker
             players={players}
             spinOptions={spinOptions}
+            mode={mode}
             spin={spin}
             round={filled}
             lineup={lineup}

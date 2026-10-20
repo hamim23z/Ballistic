@@ -28,6 +28,7 @@ export const POSITIONS: CourtPosition[] = [
     x: 418,
     y: 262,
     modeTitle: "0-82",
+    href: "/court/0-82",
     modeDescription:
       "The reverse challenge. Not as easy as it seems. Draft the worst lineup you can and try to lose every single game.",
   },

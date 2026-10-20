@@ -1,6 +1,7 @@
 'use client';
 
 import { POSITIONS, type PositionId } from '@/components/court/modes';
+import type { DraftMode } from '@/components/court/draft/copy';
 import { spinLabel, type DraftPlayer, type DraftSpin, type Lineup } from '@/components/court/draft/types';
 import { initials } from '@/components/court/draft/DraftCourt';
 import SpinReel from '@/components/court/draft/SpinReel';
@@ -11,6 +12,7 @@ import StatLine from '@/components/court/draft/StatLine';
 export default function PlayerPicker({
   players,
   spinOptions,
+  mode,
   spin,
   round,
   lineup,
@@ -20,6 +22,7 @@ export default function PlayerPicker({
 }: {
   players: DraftPlayer[];
   spinOptions: DraftSpin[];
+  mode: DraftMode;
   spin: DraftSpin | null;
   /** Changes after every pick so the reel resets for the next spin. */
   round: number;
@@ -41,14 +44,14 @@ export default function PlayerPicker({
         <div className="flex items-center justify-between gap-3">
           <h2 id="picker-heading" className="font-display text-lg font-bold text-white">
             {full ? (
-              'Lineup full'
+              mode.fullTitle
             ) : spin ? (
               <>
                 Pick from the <span className="text-gradient">{spin.team}</span>
               </>
             ) : (
               <>
-                Spin for a <span className="text-gradient">player</span>
+                Spin for a <span className="text-gradient">{mode.pickerIdleAccent}</span>
               </>
             )}
           </h2>
@@ -58,15 +61,15 @@ export default function PlayerPicker({
         </div>
         <p className="mt-1 text-sm text-slate-400">
           {full
-            ? 'Tap a player on the court to move them, or finalize your lineup.'
+            ? mode.fullHint
             : spin
-              ? `Choose one ${spinLabel(spin)} player and the open spot they’ll play.`
-              : 'Spin to land on a team and era, then pick one player from that roster.'}
+              ? mode.pickerSpunHint.replace('{team}', spinLabel(spin))
+              : mode.pickerIdleHint}
         </p>
 
         {!full && (
           <div className="mt-4">
-            <SpinReel key={round} options={spinOptions} landed={spin} onLand={onSpun} />
+            <SpinReel key={round} options={spinOptions} idleLabel={mode.reelIdle} landed={spin} onLand={onSpun} />
           </div>
         )}
       </div>

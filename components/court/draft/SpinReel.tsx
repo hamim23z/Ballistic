@@ -10,10 +10,13 @@ const LAPS = 5; // full passes through the options before landing
 // the result. Remount it (key) for each new spin so it starts fresh.
 export default function SpinReel({
   options,
+  idleLabel,
   landed,
   onLand,
 }: {
   options: DraftSpin[];
+  /** Shown over the reel before the first spin. */
+  idleLabel: string;
   landed: DraftSpin | null;
   onLand: (spin: DraftSpin) => void;
 }) {
@@ -98,7 +101,7 @@ export default function SpinReel({
         {!landed && !spinning && (
           <div className="absolute inset-0 z-30 flex items-center justify-center bg-court-ink/40 backdrop-blur-[2px]">
             <span className="font-display text-sm font-semibold uppercase tracking-[0.25em] text-slate-300">
-              Spin for a player
+              {idleLabel}
             </span>
           </div>
         )}
