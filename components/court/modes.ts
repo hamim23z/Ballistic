@@ -47,8 +47,9 @@ export const POSITIONS: CourtPosition[] = [
     x: 342,
     y: 150,
     modeTitle: "Pass Chain",
+    href: "/court/pass-chain",
     modeDescription:
-      "Connect two players through the teammates they shared. Find the shortest chain you can, one link at a time.",
+      "Pass the ball from teammate to teammate. Every link has to be real, and one bad pass snaps the chain. How long can you keep it going?",
   },
   {
     id: "C",
