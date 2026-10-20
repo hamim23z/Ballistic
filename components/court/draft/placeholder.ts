@@ -8,8 +8,10 @@ export const PLACEHOLDER_SPINS: DraftSpin[] = [
   { id: 'lal-1980s', team: 'Lakers', era: '1980s' },
   { id: 'bos-1980s', team: 'Celtics', era: '1980s' },
   { id: 'chi-1990s', team: 'Bulls', era: '1990s' },
+  { id: 'bos-2000s', team: 'Celtics', era: '2000s' },
   { id: 'sas-2000s', team: 'Spurs', era: '2000s' },
   { id: 'gsw-2010s', team: 'Warriors', era: '2010s' },
+  { id: 'lal-2020s', team: 'Lakers', era: '2020s' },
   { id: 'den-2020s', team: 'Nuggets', era: '2020s' },
 ];
 
@@ -47,6 +49,13 @@ const ROSTERS: Record<string, Row[]> = {
     ['Dennis Rodman', ['PF'], [7.3, 1.8, 13.1, 0.7, 0.6]],
     ['Luc Longley', ['C'], [7.2, 1.7, 5.0, 0.4, 1.0]],
   ],
+  'bos-2000s': [
+    ['Rajon Rondo', ['PG'], [9.8, 7.9, 4.5, 1.7, 0.1]],
+    ['Ray Allen', ['SG'], [18.9, 3.4, 4.1, 1.1, 0.2]],
+    ['Paul Pierce', ['SF', 'SG', 'PF'], [19.7, 3.5, 5.6, 1.3, 0.6]],
+    ['Kevin Garnett', ['PF', 'C'], [17.8, 3.7, 10.0, 1.3, 1.4]],
+    ['Kendrick Perkins', ['C'], [5.4, 1.0, 5.8, 0.4, 1.1]],
+  ],
   'sas-2000s': [
     ['Tony Parker', ['PG'], [15.5, 5.6, 2.7, 0.8, 0.1]],
     ['Manu Ginóbili', ['SG'], [13.3, 3.8, 3.5, 1.3, 0.3]],
@@ -60,6 +69,13 @@ const ROSTERS: Record<string, Row[]> = {
     ['Kevin Durant', ['SF', 'PF'], [27.3, 4.4, 7.0, 1.0, 1.1]],
     ['Draymond Green', ['PF'], [8.7, 5.6, 7.0, 1.3, 0.9]],
     ['Andrew Bogut', ['C'], [9.6, 2.2, 8.7, 0.6, 1.5]],
+  ],
+  'lal-2020s': [
+    ['Luka Dončić', ['PG', 'SG'], [28.7, 8.3, 8.7, 1.4, 0.4]],
+    ['Austin Reaves', ['SG', 'SF'], [13.1, 4.1, 3.6, 0.7, 0.3]],
+    ['LeBron James', ['PG', 'SG', 'SF', 'PF', 'C'], [27.0, 7.4, 7.5, 1.5, 0.7]],
+    ['Rui Hachimura', ['PF', 'SF'], [12.6, 1.2, 4.9, 0.5, 0.3]],
+    ['Anthony Davis', ['PF', 'C'], [24.1, 2.4, 10.6, 1.3, 2.3]],
   ],
   'den-2020s': [
     ['Jamal Murray', ['PG'], [17.5, 4.7, 3.9, 1.0, 0.3]],

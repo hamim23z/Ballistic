@@ -32,12 +32,6 @@ export type DraftResult = {
 
 export type Lineup = Record<PositionId, DraftPlayer | null>;
 
-export type Spins = Record<PositionId, DraftSpin | null>;
-
 export function spinLabel(spin: DraftSpin) {
   return `${spin.era} ${spin.team}`;
-}
-
-export function shortSpinLabel(spin: DraftSpin) {
-  return `’${spin.era.slice(2)} ${spin.team}`;
 }

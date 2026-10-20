@@ -1,23 +1,20 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import type { PositionId } from '@/components/court/modes';
 import type { DraftSpin } from '@/components/court/draft/types';
 
 const ITEM = 56; // px per reel row
 const LAPS = 5; // full passes through the options before landing
 
 // A slot-machine reel of team-eras. Three rows are visible; the middle one is
-// the result. Remount it (key) for each lineup slot so it starts fresh.
+// the result. Remount it (key) for each new spin so it starts fresh.
 export default function SpinReel({
   options,
   landed,
-  slot,
   onLand,
 }: {
   options: DraftSpin[];
   landed: DraftSpin | null;
-  slot: PositionId;
   onLand: (spin: DraftSpin) => void;
 }) {
   const strip = Array.from({ length: LAPS + 1 }, () => options).flat();
@@ -101,7 +98,7 @@ export default function SpinReel({
         {!landed && !spinning && (
           <div className="absolute inset-0 z-30 flex items-center justify-center bg-court-ink/40 backdrop-blur-[2px]">
             <span className="font-display text-sm font-semibold uppercase tracking-[0.25em] text-slate-300">
-              Spin for your {slot}
+              Spin for a player
             </span>
           </div>
         )}
@@ -126,7 +123,7 @@ export default function SpinReel({
             >
               <path d="M16 10a6 6 0 11-1.8-4.3M16 3.5v3.2h-3.2" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            {spinning ? 'Spinning…' : `Spin for ${slot}`}
+            {spinning ? 'Spinning…' : 'Spin for player'}
           </span>
         </button>
       )}
