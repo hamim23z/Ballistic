@@ -56,6 +56,7 @@ export const POSITIONS: CourtPosition[] = [
     x: 168,
     y: 104,
     modeTitle: "Mystery Player",
+    href: "/court/mystery-player",
     modeDescription:
       "A hidden player, a handful of clues. Use their stats, teams and draft year to name them in as few guesses as possible.",
   },
