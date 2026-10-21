@@ -38,6 +38,7 @@ export const POSITIONS: CourtPosition[] = [
     x: 82,
     y: 262,
     modeTitle: "Simulate",
+    href: "/simulate",
     modeDescription:
       "Pick your five, then play out a full 82-game season + playoffs and see what record your team actually earns and if you can win the championship.",
   },
